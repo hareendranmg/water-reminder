@@ -86,6 +86,21 @@ async fn snooze_reminder(state: tauri::State<'_, Arc<AppState>>) -> Result<(), S
     Ok(())
 }
 
+#[tauri::command]
+async fn get_next_reminder_time(state: tauri::State<'_, Arc<AppState>>) -> Result<u64, String> {
+    let interval = *state.interval_secs.lock().unwrap();
+    let last_shown = *state.last_shown.lock().unwrap();
+    
+    let elapsed = last_shown.elapsed().as_secs();
+    let remaining = if elapsed >= interval {
+        0 // Should trigger now
+    } else {
+        interval - elapsed
+    };
+    
+    Ok(remaining)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state = Arc::new(AppState {
@@ -97,7 +112,7 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_opener::init())
         .manage(state.clone())
-        .invoke_handler(tauri::generate_handler![hide_window, show_window, get_settings, update_settings, snooze_reminder])
+        .invoke_handler(tauri::generate_handler![hide_window, show_window, get_settings, update_settings, snooze_reminder, get_next_reminder_time])
         .setup(move |app| {
             // Enable autostart on startup
             let _ = app.autolaunch().enable();

@@ -1,11 +1,27 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Droplets, Settings, X } from 'lucide-react';
+import { Droplets, Settings, X, Clock } from 'lucide-react';
+import { invoke } from '@tauri-apps/api/core';
 
 interface ReminderScreenProps {
     onDismiss: () => void;
     onDrink: () => void;
     onSettings: () => void;
     onClose: () => void;
+}
+
+function formatTime(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+    } else if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
+    } else {
+        return `${secs}s`;
+    }
 }
 
 const containerVariants = {
@@ -36,6 +52,77 @@ const itemVariants = {
 };
 
 export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose }: ReminderScreenProps) {
+    const [timeRemaining, setTimeRemaining] = useState<number>(0);
+    const [reminderInterval, setReminderInterval] = useState<number>(3600);
+
+    const updateCountdown = async () => {
+        try {
+            const remaining = await invoke<number>('get_next_reminder_time');
+            setTimeRemaining(remaining);
+        } catch (error) {
+            console.error('Failed to get next reminder time:', error);
+        }
+    };
+
+    useEffect(() => {
+        let countdownTimer: NodeJS.Timeout;
+        let syncTimer: NodeJS.Timeout;
+
+        // Get the interval and initial countdown
+        const initialize = async () => {
+            try {
+                const intervalSecs = await invoke<number>('get_settings');
+                setReminderInterval(intervalSecs);
+                
+                // Get initial countdown from backend
+                const remaining = await invoke<number>('get_next_reminder_time');
+                setTimeRemaining(remaining);
+
+                // Start decrementing countdown locally every second
+                countdownTimer = setInterval(() => {
+                    setTimeRemaining((prev) => {
+                        if (prev > 0) {
+                            return prev - 1;
+                        }
+                        // If it reaches 0, refresh from backend
+                        updateCountdown();
+                        return 0;
+                    });
+                }, 1000);
+
+                // Refresh from backend every 10 seconds to stay in sync
+                syncTimer = setInterval(() => {
+                    updateCountdown();
+                }, 10000);
+            } catch (error) {
+                console.error('Failed to initialize countdown:', error);
+            }
+        };
+
+        initialize();
+
+        return () => {
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (syncTimer) clearInterval(syncTimer);
+        };
+    }, []);
+
+    // Update countdown when actions are taken
+    const handleDismissWithUpdate = async () => {
+        await onDismiss();
+        // Refresh countdown after backend updates
+        setTimeout(updateCountdown, 200);
+    };
+
+    const handleDrinkWithUpdate = async () => {
+        await onDrink();
+        // Refresh countdown after backend updates
+        setTimeout(updateCountdown, 200);
+    };
+
+    const nextReminderDate = new Date(Date.now() + timeRemaining * 1000);
+    const progressPercentage = reminderInterval > 0 ? Math.min(100, ((reminderInterval - timeRemaining) / reminderInterval) * 100) : 0;
+
     return (
         <motion.div
             variants={containerVariants}
@@ -68,8 +155,8 @@ export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose
                 <Settings size={20} />
             </motion.button>
 
-            {/* Main Card */}
-            <motion.div className="reminder-card" variants={itemVariants}>
+            {/* Main Content */}
+            <motion.div className="reminder-content" variants={itemVariants}>
                 {/* Animated Water Icon */}
                 <motion.div
                     className="water-icon-container"
@@ -110,12 +197,41 @@ export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose
                     It's been an hour. Take a sip of water.
                 </motion.p>
 
+                {/* Countdown Timer */}
+                <motion.div className="countdown-section" variants={itemVariants}>
+                    <div className="countdown-container">
+                        <Clock className="countdown-icon" size={18} />
+                        <div className="countdown-content">
+                            <div className="countdown-label">Next reminder in</div>
+                            <motion.div
+                                key={timeRemaining}
+                                initial={{ scale: 1.2, opacity: 0.5 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                className="countdown-time"
+                            >
+                                {formatTime(timeRemaining)}
+                            </motion.div>
+                            <div className="countdown-date">
+                                {nextReminderDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                        </div>
+                    </div>
+                    {/* Progress Bar */}
+                    <motion.div 
+                        className="countdown-progress-bar"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${progressPercentage}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                    />
+                </motion.div>
+
                 {/* Action Buttons */}
                 <motion.div className="reminder-actions" variants={itemVariants}>
                     <motion.button
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={onDismiss}
+                        onClick={handleDismissWithUpdate}
                         className="btn-secondary"
                     >
                         Later
@@ -123,7 +239,7 @@ export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose
                     <motion.button
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={onDrink}
+                        onClick={handleDrinkWithUpdate}
                         className="btn-primary"
                     >
                         I Drank Water
