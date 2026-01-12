@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { Droplets, Settings } from 'lucide-react';
+import { Droplets, Settings, X } from 'lucide-react';
 
 interface ReminderScreenProps {
     onDismiss: () => void;
     onDrink: () => void;
     onSettings: () => void;
+    onClose: () => void;
 }
 
 const containerVariants = {
@@ -34,7 +35,7 @@ const itemVariants = {
     },
 };
 
-export default function ReminderScreen({ onDismiss, onDrink, onSettings }: ReminderScreenProps) {
+export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose }: ReminderScreenProps) {
     return (
         <motion.div
             variants={containerVariants}
@@ -43,6 +44,18 @@ export default function ReminderScreen({ onDismiss, onDrink, onSettings }: Remin
             exit="exit"
             className="reminder-container"
         >
+            {/* Close Button */}
+            <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onClose}
+                className="close-button"
+                title="Close"
+                variants={itemVariants}
+            >
+                <X size={20} />
+            </motion.button>
+
             {/* Settings Button */}
             <motion.button
                 whileHover={{ scale: 1.1, rotate: 90 }}

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Droplets, Settings, Sparkles } from 'lucide-react';
+import { Droplets, Settings, Sparkles, X } from 'lucide-react';
 
-export default function StartupScreen({ onComplete, onSettings }: { onComplete: () => void; onSettings: () => void }) {
+export default function StartupScreen({ onComplete, onSettings, onClose }: { onComplete: () => void; onSettings: () => void; onClose: () => void }) {
     useEffect(() => {
         const timer = setTimeout(() => {
             onComplete();
@@ -46,6 +46,18 @@ export default function StartupScreen({ onComplete, onSettings }: { onComplete: 
             exit="exit"
             className="startup-container"
         >
+            {/* Close Button */}
+            <motion.button
+                variants={itemVariants}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onClose}
+                className="startup-close-button"
+                title="Close"
+            >
+                <X size={20} />
+            </motion.button>
+
             {/* Settings Button */}
             <motion.button
                 variants={itemVariants}

@@ -50,6 +50,11 @@ function App() {
     setMode(previousMode);
   };
 
+  const handleClose = async () => {
+    await invoke("hide_window");
+    setMode("hidden");
+  };
+
   // Listen for backend event "show_reminder"
   // Listen for backend event "show_reminder"
   useEffect(() => {
@@ -88,6 +93,7 @@ function App() {
               key="startup"
               onComplete={handleStartupComplete}
               onSettings={handleOpenSettings}
+              onClose={handleClose}
             />
           )}
           {mode === "reminder" && (
@@ -96,6 +102,7 @@ function App() {
               onDismiss={handleDismiss}
               onDrink={handleDrink}
               onSettings={handleOpenSettings}
+              onClose={handleClose}
             />
           )}
           {mode === "settings" && (
