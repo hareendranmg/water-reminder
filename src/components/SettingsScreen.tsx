@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { invoke } from '@tauri-apps/api/core';
-import { ArrowLeft, Clock, Moon, Sun, Palette, ChevronUp, ChevronDown } from 'lucide-react';
-import { useTheme } from '../theme/theme';
+import { ArrowLeft, Clock, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface SettingsScreenProps {
     onBack: () => void;
@@ -44,8 +43,6 @@ const itemVariants = {
 };
 
 export default function SettingsScreen({ onBack }: SettingsScreenProps) {
-    const { seedColor, setSeedColor, isDark, toggleDarkMode } = useTheme();
-
     const [hours, setHours] = useState(1);
     const [minutes, setMinutes] = useState(0);
     const [seconds, setSeconds] = useState(0);
@@ -194,46 +191,6 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
                             <InputField label="Mins" value={minutes} onChange={setMinutes} max={59} />
                             <span className="time-separator">:</span>
                             <InputField label="Secs" value={seconds} onChange={setSeconds} max={59} />
-                        </motion.div>
-
-                        {/* Appearance Settings */}
-                        <motion.div className="appearance-section" variants={itemVariants}>
-                            <div className="appearance-header">
-                                <Palette className="appearance-icon" size={20} />
-                                <h3 className="appearance-title">Appearance</h3>
-                            </div>
-
-                            <div className="appearance-item">
-                                <span className="appearance-label">Theme Color</span>
-                                <motion.div
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <input
-                                        type="color"
-                                        value={seedColor}
-                                        onChange={(e) => setSeedColor(e.target.value)}
-                                        className="color-picker"
-                                    />
-                                </motion.div>
-                            </div>
-
-                            <div className="appearance-item">
-                                <span className="appearance-label">Dark Mode</span>
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={toggleDarkMode}
-                                    className={`dark-mode-toggle ${isDark ? 'dark-mode-on' : ''}`}
-                                >
-                                    <motion.div
-                                        className="dark-mode-thumb"
-                                        animate={{ x: isDark ? 28 : 2 }}
-                                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                    >
-                                        {isDark ? <Moon size={14} /> : <Sun size={14} />}
-                                    </motion.div>
-                                </motion.button>
-                            </div>
                         </motion.div>
 
                         {/* Quick Presets */}
