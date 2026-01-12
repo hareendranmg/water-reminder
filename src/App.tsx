@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { ThemeProvider } from "./theme/theme";
 import { AnimatePresence } from "framer-motion";
 import StartupScreen from "./components/StartupScreen";
 import ReminderScreen from "./components/ReminderScreen";
+import SettingsScreen from "./components/SettingsScreen";
 import "./App.css";
 
 // We'll define a custom event or just use window visibility for now.
 // Ideally backend sends an event "show-reminder".
 
 function App() {
-  const [mode, setMode] = useState<"startup" | "reminder" | "hidden">("startup");
+  const [mode, setMode] = useState<"startup" | "reminder" | "hidden" | "settings">("startup");
+  const [previousMode, setPreviousMode] = useState<"startup" | "reminder" | "hidden" | "settings">("startup");
 
   const handleStartupComplete = async () => {
     // Hide the window after startup
@@ -34,6 +37,15 @@ function App() {
     // Log drinking if we wanted to
     await invoke("hide_window");
     setMode("hidden");
+  };
+
+  const handleOpenSettings = () => {
+    setPreviousMode(mode);
+    setMode("settings");
+  };
+
+  const handleBackFromSettings = () => {
+    setMode(previousMode);
   };
 
   // Listen for backend event "show_reminder"
@@ -66,16 +78,30 @@ function App() {
   // Then we need a mechanism to show it again.
 
   return (
-    <div className="container" style={{ width: '100vw', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <AnimatePresence mode="wait">
-        {mode === "startup" && (
-          <StartupScreen key="startup" onComplete={handleStartupComplete} />
-        )}
-        {mode === "reminder" && (
-          <ReminderScreen key="reminder" onDismiss={handleDismiss} onDrink={handleDrink} />
-        )}
-      </AnimatePresence>
-    </div>
+    <ThemeProvider>
+      <div className="app-container">
+        <AnimatePresence mode="wait">
+          {mode === "startup" && (
+            <StartupScreen
+              key="startup"
+              onComplete={handleStartupComplete}
+              onSettings={handleOpenSettings}
+            />
+          )}
+          {mode === "reminder" && (
+            <ReminderScreen
+              key="reminder"
+              onDismiss={handleDismiss}
+              onDrink={handleDrink}
+              onSettings={handleOpenSettings}
+            />
+          )}
+          {mode === "settings" && (
+            <SettingsScreen key="settings" onBack={handleBackFromSettings} />
+          )}
+        </AnimatePresence>
+      </div>
+    </ThemeProvider>
   );
 }
 

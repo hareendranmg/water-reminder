@@ -1,62 +1,122 @@
 import { motion } from 'framer-motion';
-import { GlassWater } from 'lucide-react';
+import { Droplets, Settings } from 'lucide-react';
 
 interface ReminderScreenProps {
     onDismiss: () => void;
     onDrink: () => void;
+    onSettings: () => void;
 }
 
-export default function ReminderScreen({ onDismiss, onDrink }: ReminderScreenProps) {
+const containerVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+            duration: 0.5,
+            ease: [0.25, 0.46, 0.45, 0.94],
+            staggerChildren: 0.1,
+        },
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.95,
+        transition: { duration: 0.3 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
+};
+
+export default function ReminderScreen({ onDismiss, onDrink, onSettings }: ReminderScreenProps) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="glass-panel flex flex-col items-center gap-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="reminder-container"
         >
-            <motion.div
-                animate={{
-                    y: [0, -10, 0],
-                    rotate: [0, 5, -5, 0]
-                }}
-                transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                }}
+            {/* Settings Button */}
+            <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onSettings}
+                className="settings-button"
+                title="Settings"
+                variants={itemVariants}
             >
-                <GlassWater className="icon-large text-blue-100" />
-            </motion.div>
+                <Settings size={20} />
+            </motion.button>
 
-            <div>
-                <h1 style={{ fontSize: '2.5em' }}>Time to Hydrate!</h1>
-                <p className="text-lg opacity-90">
+            {/* Main Card */}
+            <motion.div className="reminder-card" variants={itemVariants}>
+                {/* Animated Water Icon */}
+                <motion.div
+                    className="water-icon-container"
+                    animate={{
+                        y: [0, -15, 0],
+                        rotate: [0, 3, -3, 0],
+                    }}
+                    transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                >
+                    <div className="water-icon-wrapper">
+                        <Droplets className="water-icon" size={80} />
+                        <motion.div
+                            className="water-ripple"
+                            animate={{
+                                scale: [1, 1.3, 1],
+                                opacity: [0.6, 0, 0.6],
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeOut",
+                            }}
+                        />
+                    </div>
+                </motion.div>
+
+                {/* Heading */}
+                <motion.h1 className="reminder-heading" variants={itemVariants}>
+                    Time to Hydrate!
+                </motion.h1>
+
+                {/* Message */}
+                <motion.p className="reminder-message" variants={itemVariants}>
                     It's been an hour. Take a sip of water.
-                </p>
-            </div>
+                </motion.p>
 
-            <div className="flex gap-4 mt-4">
-                <button
-                    onClick={onDismiss}
-                    style={{
-                        background: 'rgba(255,255,255,0.1)',
-                        border: '1px solid rgba(255,255,255,0.2)'
-                    }}
-                >
-                    Later
-                </button>
-                <button
-                    onClick={onDrink}
-                    style={{
-                        background: '#ffffff',
-                        color: '#3a7bd5',
-                        fontWeight: 'bold'
-                    }}
-                >
-                    I Drank Water
-                </button>
-            </div>
+                {/* Action Buttons */}
+                <motion.div className="reminder-actions" variants={itemVariants}>
+                    <motion.button
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={onDismiss}
+                        className="btn-secondary"
+                    >
+                        Later
+                    </motion.button>
+                    <motion.button
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={onDrink}
+                        className="btn-primary"
+                    >
+                        I Drank Water
+                    </motion.button>
+                </motion.div>
+            </motion.div>
         </motion.div>
     );
 }
