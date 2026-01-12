@@ -15,14 +15,14 @@ const PRESETS = [
     { label: '2h', value: 2 * 60 * 60 },
 ];
 
-const containerVariants = {
+const containerVariants: any = {
     hidden: { opacity: 0, x: 20 },
     visible: {
         opacity: 1,
         x: 0,
         transition: {
             duration: 0.4,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            ease: "easeOut",
             staggerChildren: 0.08,
         },
     },
@@ -33,12 +33,12 @@ const containerVariants = {
     },
 };
 
-const itemVariants = {
+const itemVariants: any = {
     hidden: { opacity: 0, y: 15 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+        transition: { duration: 0.4, ease: "easeOut" },
     },
 };
 

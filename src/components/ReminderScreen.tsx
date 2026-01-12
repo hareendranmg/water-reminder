@@ -14,7 +14,7 @@ function formatTime(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
         return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
@@ -24,14 +24,14 @@ function formatTime(seconds: number): string {
     }
 }
 
-const containerVariants = {
+const containerVariants: any = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: {
         opacity: 1,
         scale: 1,
         transition: {
             duration: 0.5,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            ease: "easeOut",
             staggerChildren: 0.1,
         },
     },
@@ -42,12 +42,12 @@ const containerVariants = {
     },
 };
 
-const itemVariants = {
+const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+        transition: { duration: 0.5, ease: "easeOut" },
     },
 };
 
@@ -65,15 +65,15 @@ export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose
     };
 
     useEffect(() => {
-        let countdownTimer: NodeJS.Timeout;
-        let syncTimer: NodeJS.Timeout;
+        let countdownTimer: ReturnType<typeof setTimeout>;
+        let syncTimer: ReturnType<typeof setTimeout>;
 
         // Get the interval and initial countdown
         const initialize = async () => {
             try {
                 const intervalSecs = await invoke<number>('get_settings');
                 setReminderInterval(intervalSecs);
-                
+
                 // Get initial countdown from backend
                 const remaining = await invoke<number>('get_next_reminder_time');
                 setTimeRemaining(remaining);
@@ -218,7 +218,7 @@ export default function ReminderScreen({ onDismiss, onDrink, onSettings, onClose
                         </div>
                     </div>
                     {/* Progress Bar */}
-                    <motion.div 
+                    <motion.div
                         className="countdown-progress-bar"
                         initial={{ width: 0 }}
                         animate={{ width: `${progressPercentage}%` }}

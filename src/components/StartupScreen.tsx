@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Droplets, Settings, Sparkles, X } from 'lucide-react';
+import { Droplets, Settings, X } from 'lucide-react';
 
 export default function StartupScreen({ onComplete, onSettings, onClose }: { onComplete: () => void; onSettings: () => void; onClose: () => void }) {
     useEffect(() => {
@@ -10,14 +10,14 @@ export default function StartupScreen({ onComplete, onSettings, onClose }: { onC
         return () => clearTimeout(timer);
     }, [onComplete]);
 
-    const containerVariants = {
+    const containerVariants: any = {
         hidden: { opacity: 0, scale: 0.9 },
         visible: {
             opacity: 1,
             scale: 1,
             transition: {
                 duration: 0.6,
-                ease: [0.25, 0.46, 0.45, 0.94],
+                ease: "easeOut",
                 staggerChildren: 0.15,
             },
         },
@@ -29,12 +29,12 @@ export default function StartupScreen({ onComplete, onSettings, onClose }: { onC
         },
     };
 
-    const itemVariants = {
+    const itemVariants: any = {
         hidden: { opacity: 0, y: 20 },
         visible: {
             opacity: 1,
             y: 0,
-            transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+            transition: { duration: 0.5, ease: "easeOut" },
         },
     };
 
