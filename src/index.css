@@ -517,13 +517,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 2rem;
+    padding: 3rem 2rem 2rem 2rem;
     position: relative;
+    box-sizing: border-box;
 }
 
 .startup-settings-button {
     position: absolute;
-    top: 2rem;
+    top: 2.5rem;
     right: 2rem;
     width: 48px;
     height: 48px;
