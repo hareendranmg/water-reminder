@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { invoke } from '@tauri-apps/api/core';
-import { ArrowLeft, Clock, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface SettingsScreenProps {
     onBack: () => void;
@@ -154,15 +154,7 @@ export default function SettingsScreen({ onBack }: SettingsScreenProps) {
 
             {/* Header */}
             <motion.div className="settings-header" variants={itemVariants}>
-                <motion.div
-                    className="settings-icon-wrapper"
-                    animate={{ rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                >
-                    <Clock className="settings-icon" size={32} />
-                </motion.div>
                 <h2 className="settings-title">Set Interval</h2>
-                <p className="settings-subtitle">Remind me to drink water every...</p>
             </motion.div>
 
             <AnimatePresence mode="wait">
