@@ -1,0 +1,7 @@
+/* Merged into index.css but ensuring App.css doesn't valid standard styles */
+.container {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
