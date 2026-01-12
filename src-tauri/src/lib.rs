@@ -62,6 +62,30 @@ async fn update_settings(app_handle: tauri::AppHandle, state: tauri::State<'_, A
     Ok(())
 }
 
+#[tauri::command]
+async fn snooze_reminder(state: tauri::State<'_, Arc<AppState>>) -> Result<(), String> {
+    const SNOOZE_DURATION_SECS: u64 = 300; // 5 minutes
+    
+    let interval = *state.interval_secs.lock().unwrap();
+    let mut last_shown = state.last_shown.lock().unwrap();
+    
+    // Set last_shown so that the reminder will trigger in 5 minutes
+    // We want: elapsed >= interval to be true in 5 minutes
+    // So: (now + 300) - last_shown >= interval
+    // Therefore: last_shown <= now + 300 - interval
+    // If interval > 300, set last_shown = now - (interval - 300)
+    // If interval <= 300, set last_shown = now - 300 so elapsed = 300 in 5 minutes
+    if interval > SNOOZE_DURATION_SECS {
+        *last_shown = Instant::now() - Duration::from_secs(interval - SNOOZE_DURATION_SECS);
+    } else {
+        // If interval is 5 minutes or less, set last_shown so it triggers in exactly 5 minutes
+        // We set it to now - 300, so in 5 minutes elapsed = 300 >= interval
+        *last_shown = Instant::now() - Duration::from_secs(SNOOZE_DURATION_SECS);
+    }
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let state = Arc::new(AppState {
@@ -73,7 +97,7 @@ pub fn run() {
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .plugin(tauri_plugin_opener::init())
         .manage(state.clone())
-        .invoke_handler(tauri::generate_handler![hide_window, show_window, get_settings, update_settings])
+        .invoke_handler(tauri::generate_handler![hide_window, show_window, get_settings, update_settings, snooze_reminder])
         .setup(move |app| {
             // Enable autostart on startup
             let _ = app.autolaunch().enable();

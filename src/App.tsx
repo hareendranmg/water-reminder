@@ -27,6 +27,8 @@ function App() {
   };
 
   const handleDismiss = async () => {
+    // Snooze the reminder for 5 minutes
+    await invoke("snooze_reminder");
     await invoke("hide_window");
     // We keep mode as reminder or switch to hidden, waiting for next event.
     // Visually we want to probably exit first.
